@@ -1,0 +1,5 @@
+*
+!.gitignore
+!example.cpp
+!json_parser.hpp
+!readme.md
