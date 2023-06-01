@@ -9,9 +9,9 @@
 enum symbol : uint_fast8_t
 {
     // tokens
-    whitespace, n,
+    whitespace, n, f,
     // nonterminals
-    nt_whitespace, nt_value
+    nt_whitespace, nt_value,
 };
 
 void push_multiple (std::stack<uint_fast8_t>& stack, std::vector<uint_fast8_t>&& symbols)
@@ -30,12 +30,12 @@ uint_fast8_t error ()
 
 uint_fast8_t parse_json (std::string buffer)
 {
-    // repeating match: 4
-    uint8_t rule_table [2][2] =
+    // repeating match: 3
+    uint8_t rule_table [2][3] =
     {
-    //  ws  n
-         4, 1, // ws
-         0, 3, // val
+    //  ws  n  f
+         3, 1, 1, // ws
+         0, 4, 5, // val
     };
 
     std::stack<uint_fast8_t> stack;
@@ -55,7 +55,7 @@ uint_fast8_t parse_json (std::string buffer)
                 break;
         }
 
-        switch (rule_table[stack.top() % 2][token % 2])
+        switch (rule_table[stack.top() % 3][token % 3])
         {
             case 0: // error
                 return error ();
@@ -66,17 +66,22 @@ uint_fast8_t parse_json (std::string buffer)
             case 2: // match
                 stack.pop();
                 break;
-            case 3: // null value
+            case 4: // null value
                 if (buffer[index + 1] == 'u' && buffer[index + 2] == 'l' && buffer[index + 3] == 'l')
                 {
                     stack.pop();
                     index += 3;
+                    break;
                 }
-                else
+                return error ();
+            case 5: // false value
+                if (buffer[index + 1] == 'a' && buffer[index + 2] == 'l' && buffer[index + 3] == 's' && buffer[index + 4] == 'e')
                 {
-                    return error ();
+                    stack.pop();
+                    index += 4;
+                    break;
                 }
-                break;
+                return error ();
         }
     }
 

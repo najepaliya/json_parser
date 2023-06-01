@@ -2,5 +2,5 @@
 
 int main ()
 {
-    return parse_json ("                    null ");
+    return parse_json ("                    false ");
 }
