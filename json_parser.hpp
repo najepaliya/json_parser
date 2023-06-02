@@ -9,7 +9,7 @@
 enum symbol : uint_fast8_t
 {
     // tokens
-    whitespace, n, f, t, digit, minus, dot, Ee,
+    whitespace, n, f, t, digit, minus, dot, Ee, quote,
     // nonterminals
     nt_whitespace, nt_value, nt_digits, nt_fraction, nt_exponent,
 };
@@ -22,7 +22,21 @@ void push_multiple (std::stack<uint_fast8_t>& stack, std::vector<uint_fast8_t>&&
     }
 }
 
-bool is_number (char character)
+bool match_pattern (std::string&& buffer, std::string&& pattern)
+{
+    bool result = true;
+    for (uint_fast8_t index = 0; index < pattern.size(); index += 1)
+    {
+        if (buffer[index] != pattern[index])
+        {
+            result = false;
+            break;
+        }
+    }
+    return result;
+}
+
+bool is_digit (char& character)
 {
     bool result = false;
     if (character > 47 && character < 58)
@@ -41,14 +55,14 @@ uint_fast8_t error ()
 uint_fast8_t parse_json (std::string&& buffer)
 {
     // repeating match: 3
-    uint8_t rule_table [5][8] =
+    uint8_t rule_table [5][9] =
     {
-    //  ws  n  f  t  #  -  .  Ee
-         3, 1, 1, 1, 1, 1, 1,  1, // ws
-         0, 4, 5, 6, 7, 7, 0,  0, // val
-         1, 1, 1, 1, 3, 1, 1,  1, // digs
-         1, 0, 0, 0, 0, 0, 8,  1, // frac
-         1, 0, 0, 0, 0, 0, 0,  9, // exp
+    //  ws  n  f  t  #  -  .  Ee   "
+         3, 1, 1, 1, 1, 1, 1,  1,  0, // ws
+         0, 4, 5, 6, 7, 7, 0,  0, 10, // val
+         1, 1, 1, 1, 3, 1, 1,  1,  0, // digs
+         1, 0, 0, 0, 0, 0, 8,  1,  0, // frac
+         1, 0, 0, 0, 0, 0, 0,  9,  0, // exp
     };
 
     std::stack<uint_fast8_t> stack;
@@ -86,7 +100,7 @@ uint_fast8_t parse_json (std::string&& buffer)
                 break;   
         }
 
-        switch (rule_table[stack.top() % 8][token % 8])
+        switch (rule_table[stack.top() % 9][token % 9])
         {
             case 0: // error
                 return error ();
@@ -98,7 +112,7 @@ uint_fast8_t parse_json (std::string&& buffer)
                 stack.pop();
                 break;
             case 4: // null value
-                if (buffer[index + 1] == 'u' && buffer[index + 2] == 'l' && buffer[index + 3] == 'l')
+                if (match_pattern (buffer.substr(index + 1, 3), "ull"))
                 {
                     stack.pop();
                     index += 3;
@@ -106,7 +120,7 @@ uint_fast8_t parse_json (std::string&& buffer)
                 }
                 return error ();
             case 5: // false value
-                if (buffer[index + 1] == 'a' && buffer[index + 2] == 'l' && buffer[index + 3] == 's' && buffer[index + 4] == 'e')
+                if (match_pattern (buffer.substr(index + 1, 4), "alse"))
                 {
                     stack.pop();
                     index += 4;
@@ -114,7 +128,7 @@ uint_fast8_t parse_json (std::string&& buffer)
                 }
                 return error ();
             case 6: // true value
-                if (buffer[index + 1] == 'r' && buffer[index + 2] == 'u' && buffer[index + 3] == 'e')
+                if (match_pattern (buffer.substr(index + 1, 3), "rue"))
                 {
                     stack.pop();
                     index += 3;
@@ -126,7 +140,7 @@ uint_fast8_t parse_json (std::string&& buffer)
                 push_multiple (stack, {nt_exponent, nt_fraction, nt_digits});
                 break;
             case 8: // fractional number
-                if (is_number (buffer[index + 1]))
+                if (is_digit (buffer[index + 1]))
                 {
                     stack.pop();
                     push_multiple (stack, {nt_digits});
@@ -140,7 +154,7 @@ uint_fast8_t parse_json (std::string&& buffer)
                 {
                     jump = 2;
                 }
-                if (is_number (buffer[index + jump]))
+                if (is_digit (buffer[index + jump]))
                 {
                     stack.pop();
                     push_multiple (stack, {nt_digits});

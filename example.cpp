@@ -2,5 +2,5 @@
 
 int main ()
 {
-    return parse_json ("      -012345e02 ");
+    return parse_json ("false");
 }
