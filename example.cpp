@@ -2,5 +2,10 @@
 
 int main ()
 {
-    return parse_json ("\" abcd \u00Af noway \"");
+    json j;
+    std::string str = "[1,2,3,4, {} ]";
+    
+    
+    std::cout << str << "\n";
+    j.parse (str);
 }
