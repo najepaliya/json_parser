@@ -28,7 +28,7 @@ enum symbol : uint_fast8_t
     // tokens
     end, whitespace, n, f, t, digit, minus, dot, Ee, quote, character, backslash, openbrace, closebrace, colon, comma, openbracket, closebracket,
     // nonterminals
-    nt_primitive, nt_containter, nt_whitespace, nt_value, nt_end, nt_digits, nt_fraction, nt_exponent, nt_characters, nt_headmember, /*nt_closebrace,*/ nt_colon, nt_memberlist, nt_quote, nt_headelement, nt_elementlist,
+    nt_primitive, nt_containter, nt_whitespace, nt_value, nt_end, nt_digits, nt_fraction, nt_exponent, nt_characters, nt_headmember, nt_colon, nt_memberlist, nt_quote, nt_headelement, nt_elementlist,
 };
 
 void json::parse (std::string& buffer)
@@ -46,7 +46,6 @@ void json::parse (std::string& buffer)
         1, 1,  0,  0,  0,  0,  0, 0, 8,  0, 0,  0,  0, 1, 0,  1,  0,  0, /*exp  7*/
         0, 3,  3,  3,  3,  3,  3, 3, 3,  2, 3, 10,  3, 3, 3,  3,  3,  3, /*chs  8*/
         0, 0,  0,  0,  0,  0,  0, 0, 0, 12, 0,  0,  0, 2, 0,  0,  0,  0, /*hmem 9*/
-        // 0, 0,  0,  0,  0,  0,  0, 0, 0,  0, 0,  0,  0, 2, 0,  0,  0,  0, /*cbrc 10 may not be needed*/
         0, 0,  0,  0,  0,  0,  0, 0, 0,  0, 0,  0,  0, 0, 2,  0,  0,  0, /*col  11*/
         0, 0,  0,  0,  0,  0,  0, 0, 0,  0, 0,  0,  0, 2, 0, 12,  0,  0, /*meml 12*/
         0, 0,  0,  0,  0,  0,  0, 0, 0,  2, 0,  0,  0, 0, 0,  0,  0,  0, /*quo  13*/
@@ -227,7 +226,6 @@ void json::parse (std::string& buffer)
                 break;
             case 11: // object value
                 stack.pop ();
-                // stack.push (nt_closebrace);
                 stack.push (nt_headmember);
                 stack.push (nt_whitespace);
                 break;
