@@ -45,19 +45,24 @@ class token
             }
             else
             {
+                if (this->children.size() == 0)
+                {
+                    return this->string;
+                }
+
                 std::string temp;
+                temp += this->string[0];
+
                 if (type == -2)
                 {
-                    temp += '[';
                     for (int i = 0; i < this->children.size(); i += 1)
                     {
                         temp += this->children[i].value() + ",";
                     }
-                    temp.back() = ']';
                 }
+
                 else
                 {
-                    temp += '{';
                     for (int i = 0; i < this->children.size(); i += 1)
                     {
                         if (i % 2 == 0)
@@ -69,8 +74,9 @@ class token
                             temp += this->children[i].value() + ",";
                         }
                     }
-                    temp.back() = '}';
                 }
+
+                temp.back() = this->string[1];
                 return temp;
             }
         }
