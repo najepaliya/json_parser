@@ -9,10 +9,14 @@ class token
         std::string string;
         std::vector<token> children;
         int8_t type;
-        token (int8_t type, std::string&& string)
+        void set (int8_t type, const std::string& string)
         {
             this->type = type;
             this->string = string;
+        } 
+        token (int8_t type, const std::string& string)
+        {
+            set (type, string);
         }
         token* index (const std::vector<int>& indexes)
         {
