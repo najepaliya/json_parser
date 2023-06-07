@@ -253,8 +253,13 @@ void json::parse (std::string& buffer)
                 }
                 else
                 {
+                    uint8_t type = 4;
+                    if (buffer[indexes.top()] == '"')
+                    {
+                        type = 5;
+                    }
                     // std::cout << buffer.substr (indexes.top(), index - indexes.top()) << "\n";
-                    containers.top()->children.emplace_back (0, buffer.substr (indexes.top(), index - indexes.top()));
+                    containers.top()->children.emplace_back (type, buffer.substr (indexes.top(), index - indexes.top()));
                     indexes.pop();
                 }
                 symbols.pop();
