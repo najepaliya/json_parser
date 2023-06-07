@@ -29,7 +29,7 @@ class token
             }
             return temp;
         }
-        std::string value ()
+        std::string value()
         {
             if (type > 0)
             {
@@ -76,6 +76,7 @@ class json
 {
     private:
         token root = token (0, "");
+        void clear();
     public:
         token* index()
         {
@@ -92,16 +93,24 @@ enum symbol : uint_fast8_t
     nt_end, nt_primitive, nt_container, nt_whitespace, nt_value, nt_characters, nt_escape, nt_hex, nt_headmember, nt_colon, nt_memberlist, nt_string, nt_headelement, nt_elementlist, nt_digits, nt_fraction, nt_exponent,
 };
 
-const uint_fast8_t divisor = 22;
+const uint_fast8_t divisor = 22; // number of terminals
 
 // temporary
-void print_error(int index, uint_fast8_t nonterminal, uint_fast8_t terminal, char c)
+// void print_error(int index, uint_fast8_t nonterminal, uint_fast8_t terminal, char c)
+// {
+//     std::cout << "ERROR | INDEX: " << index << " | CHARACTER: " << c << " | STACK: " << (nonterminal % divisor) << "\n";
+// }
+
+void json::clear()
 {
-    std::cout << "ERROR | INDEX: " << index << " | CHARACTER: " << c << " | STACK: " << (nonterminal % divisor) << "\n";
+    root.children.clear();
 }
 
 void json::parse (std::string& buffer)
 {
+    // erase index before parsing
+    clear();
+
     /*3 = repeating match*/
     uint_fast8_t rule_table [17][divisor] =
     {/* $  ws   "  ch   \ esc   b   u  hx   {   }   :   ,   [   ]   #   -   .  Ee   n   f   t */
@@ -215,7 +224,8 @@ void json::parse (std::string& buffer)
         switch (rule_table[symbols.top() % divisor][terminal % divisor])
         {
             case 0: // error
-                print_error (index, symbols.top(), terminal, buffer[index]);
+                // print_error (index, symbols.top(), terminal, buffer[index]);
+                clear();
                 return;
             case 1: // null
                 // std::cout << "NULL: " << symbols.top() % divisor << " | INDEX: " << index << "\n";
@@ -324,7 +334,8 @@ void json::parse (std::string& buffer)
                     }
                     else
                     {
-                        print_error (index, symbols.top(), terminal, buffer[index]);
+                        // print_error (index, symbols.top(), terminal, buffer[index]);
+                        clear();
                         return;
                     }
                 }
@@ -340,7 +351,8 @@ void json::parse (std::string& buffer)
                 }
                 else
                 {
-                    print_error (index, symbols.top(), terminal, buffer[index]);
+                    // print_error (index, symbols.top(), terminal, buffer[index]);
+                    clear();
                     return;
                 }
                 symbols.pop ();
@@ -354,7 +366,8 @@ void json::parse (std::string& buffer)
                     index += 3;
                     break;
                 }
-                print_error (index, symbols.top(), terminal, buffer[index]);
+                // print_error (index, symbols.top(), terminal, buffer[index]);
+                clear();
             case 17: // false value
                 if (buffer[index + 1] == 'a' && buffer[index + 2] == 'l' && buffer[index + 3] == 's' && buffer[index + 4] == 'e')
                 {
@@ -363,7 +376,8 @@ void json::parse (std::string& buffer)
                     index += 4;
                     break;
                 }
-                print_error (index, symbols.top(), terminal, buffer[index]);
+                // print_error (index, symbols.top(), terminal, buffer[index]);
+                clear();
             case 18: // true value
                 if (buffer[index + 1] == 'r' && buffer[index + 2] == 'u' && buffer[index + 3] == 'e')
                 {
@@ -372,7 +386,8 @@ void json::parse (std::string& buffer)
                     index += 3;
                     break;
                 }
-                print_error (index, symbols.top(), terminal, buffer[index]);
+                // print_error (index, symbols.top(), terminal, buffer[index]);
+                clear();
         }
     }
 }
