@@ -95,12 +95,6 @@ enum symbol : uint_fast8_t
 
 const uint_fast8_t divisor = 22; // number of terminals
 
-// temporary
-// void print_error(int index, uint_fast8_t nonterminal, uint_fast8_t terminal, char c)
-// {
-//     std::cout << "ERROR | INDEX: " << index << " | CHARACTER: " << c << " | STACK: " << (nonterminal % divisor) << "\n";
-// }
-
 void json::clear()
 {
     root.children.clear();
@@ -224,16 +218,13 @@ void json::parse (std::string& buffer)
         switch (rule_table[symbols.top() % divisor][terminal % divisor])
         {
             case 0: // error
-                // print_error (index, symbols.top(), terminal, buffer[index]);
                 clear();
                 return;
             case 1: // null
-                // std::cout << "NULL: " << symbols.top() % divisor << " | INDEX: " << index << "\n";
                 symbols.pop();
                 index -= 1;
                 break;
             case 2: // match
-                // std::cout << "MATCH: " << symbols.top() % divisor << " | INDEX: " << index << "\n";
                 symbols.pop();
                 break;
             case 4: // end
@@ -267,7 +258,6 @@ void json::parse (std::string& buffer)
                     {
                         type = 5;
                     }
-                    // std::cout << buffer.substr (indexes.top(), index - indexes.top()) << "\n";
                     containers.top()->children.emplace_back (type, buffer.substr (indexes.top(), index - indexes.top()));
                     indexes.pop();
                 }
@@ -334,7 +324,6 @@ void json::parse (std::string& buffer)
                     }
                     else
                     {
-                        // print_error (index, symbols.top(), terminal, buffer[index]);
                         clear();
                         return;
                     }
@@ -351,7 +340,6 @@ void json::parse (std::string& buffer)
                 }
                 else
                 {
-                    // print_error (index, symbols.top(), terminal, buffer[index]);
                     clear();
                     return;
                 }
@@ -366,7 +354,6 @@ void json::parse (std::string& buffer)
                     index += 3;
                     break;
                 }
-                // print_error (index, symbols.top(), terminal, buffer[index]);
                 clear();
             case 17: // false value
                 if (buffer[index + 1] == 'a' && buffer[index + 2] == 'l' && buffer[index + 3] == 's' && buffer[index + 4] == 'e')
@@ -376,7 +363,6 @@ void json::parse (std::string& buffer)
                     index += 4;
                     break;
                 }
-                // print_error (index, symbols.top(), terminal, buffer[index]);
                 clear();
             case 18: // true value
                 if (buffer[index + 1] == 'r' && buffer[index + 2] == 'u' && buffer[index + 3] == 'e')
@@ -386,7 +372,6 @@ void json::parse (std::string& buffer)
                     index += 3;
                     break;
                 }
-                // print_error (index, symbols.top(), terminal, buffer[index]);
                 clear();
         }
     }
