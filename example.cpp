@@ -11,6 +11,7 @@ int main()
     std::cout << t->value() << "\n"; // print token value
     t->set (4,"5");                  // set token to another value
     std::cout << t->value() << "\n"; // print token value again
-    t = j.index();
+    t = j.index();                   // get pointer to root of token tree
     std::cout << t->value() << "\n"; // print all values from root
+    return 0;
 }
