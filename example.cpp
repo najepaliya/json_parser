@@ -13,7 +13,7 @@
 
 int main()
 {
-    std::string s = "[{},null,false,true,0.1e+2,\"hello\"]";// test string
+    std::string s = "[{},null,false,true,0.1e+2,\"hello\"]";    // test string
     json j;                                                     // create json object
     j.parse (s);                                                // parse and create index
     token* t = j.index();                                       // get pointer to root of token tree
