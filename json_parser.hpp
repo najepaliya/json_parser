@@ -31,45 +31,44 @@ class token
         }
         std::string value ()
         {
-            // if (type > 0)
-            // {
-            //     return this->string;
-            // }
-            // else if (type == 0)
-            // {
-            //     return this->children[0].value();
-            // }
-            // else
-            // {
-            //     std::string temp;
-            //     if (type == -2)
-            //     {
-            //         temp += '[';
-            //         for (int i = 0; i < this->children.size(); i += 1)
-            //         {
-            //             temp += this->children[i].value() + ",";
-            //         }
-            //         temp.back() = ']';
-            //     }
-            //     else
-            //     {
-            //         temp += '{';
-            //         for (int i = 0; i < this->children.size(); i += 1)
-            //         {
-            //             if (i % 2 == 0)
-            //             {
-            //                 temp += this->children[i].value() + ":";
-            //             }
-            //             else
-            //             {
-            //                 temp += this->children[i].value() + ",";
-            //             }
-            //         }
-            //         temp.back() = '}';
-            //     }
-            //     return temp;
-            // }
-            return "";
+            if (type > 0)
+            {
+                return this->string;
+            }
+            else if (type == 0)
+            {
+                return this->children[0].value();
+            }
+            else
+            {
+                std::string temp;
+                if (type == -2)
+                {
+                    temp += '[';
+                    for (int i = 0; i < this->children.size(); i += 1)
+                    {
+                        temp += this->children[i].value() + ",";
+                    }
+                    temp.back() = ']';
+                }
+                else
+                {
+                    temp += '{';
+                    for (int i = 0; i < this->children.size(); i += 1)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            temp += this->children[i].value() + ":";
+                        }
+                        else
+                        {
+                            temp += this->children[i].value() + ",";
+                        }
+                    }
+                    temp.back() = '}';
+                }
+                return temp;
+            }
         }
 };
 
