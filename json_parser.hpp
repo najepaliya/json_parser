@@ -3,6 +3,16 @@
 #include <stack>
 #include <vector>
 
+// Integer associated types
+// Array   -2
+// Object  -1
+// Root     0
+// Null     1
+// False    2
+// True     3
+// Number   4
+// String   5
+
 class token
 {
     public:
@@ -238,7 +248,6 @@ void json::parse (std::string& buffer)
                 symbols.pop();
                 break;
             case 4: // end
-                std::cout << "SUCCESS\n";
                 return;
             case 5: // string value
                 symbols.pop();
