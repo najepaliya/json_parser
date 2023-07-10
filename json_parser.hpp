@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <iostream>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -49,19 +50,108 @@ void json::clear()
   root.children.clear();
 }
 
-enum symbols: uint_fast8_t
+enum symbol: uint_fast8_t
 {
-	// terminals
-	end,
-	// nonterminals
-	nt_end
+  // terminals
+  end, whitespace, quote, space, character, backslash,
+  // nonterminals
+  nt_end, nt_primitive, nt_whitespace, nt_value, nt_string, nt_characters
 };
 
 void json::parse (std::string& buffer)
 {
-	// append null terminator
-	buffer.push_back ('\0');
+  // erase index before parsing
+  clear();
 
-	// remove null terminator
-	buffer.pop_back();
+  // append null terminator
+  buffer.push_back ('\0');
+
+  uint_fast8_t rule_table [6][6] =
+  {
+/*  $ ws  " sp ch  \  */
+		4, 0, 0, 0, 0, 0, // end  0
+		7, 7, 7, 7, 7, 7, // prim 1 FIX LATER
+		1, 3, 1, 3, 0, 0, // ws   2
+		0, 5, 5, 0, 0, 0, // val  3
+		0, 0, 6, 0, 0, 0, // str  4
+		0, 0, 2, 3, 3, 8, // chrs 5
+  };
+	
+  // initialize symbol stack
+  std::stack<uint_fast8_t> symbols;
+  symbols.push (nt_end);
+  symbols.push (nt_whitespace);
+  symbols.push (nt_value);
+  symbols.push (nt_whitespace);
+
+  // initialize container stack
+  std::stack<token*> containers;
+  containers.push (&root);
+
+  // initialize index stack
+  std::stack<int> indexes;
+	
+  for (int index = 0; ; index += 1)
+  {
+		uint_fast8_t terminal = character;
+
+    switch (buffer[index])
+    {
+		  case '\0':
+				terminal = end;
+  			break;
+      case '\n': case '\r': case '\t':
+        terminal = whitespace;
+        break;
+      case '"':
+      	terminal = quote;
+      	break;
+      case ' ':
+      	terminal = space;
+      	break;
+      case '\\':
+        terminal = backslash;
+        break;
+    }
+
+    switch (rule_table[symbols.top() % 6][terminal % 6])
+    {
+      case 0: // error
+				std::cout << "ERROR: " << index << "->'" << buffer[index] << "'\n";
+      	clear();
+      	buffer.pop_back();
+        return;
+      case 1: // null
+      	std::cout << "NULL\n";
+      	symbols.pop();
+      	index -= 1;
+        break;
+      case 2: // match
+      	symbols.pop();
+      	break;
+      case 4: // end
+      	std::cout << "VALID\n";
+      	buffer.pop_back();
+				return;
+      case 5: // string value
+				symbols.pop();
+				symbols.push (nt_string);
+				index -= 1;
+				break;
+      case 6: // decompose string
+				symbols.pop();
+				indexes.push (index);
+				symbols.push (nt_primitive);
+				symbols.push (nt_characters);
+				break;
+		  case 7: // store primitive
+				containers.top()->children.emplace_back (buffer.substr (indexes.top(), index - indexes.top()));
+				indexes.pop();
+				symbols.pop();
+				index -= 1;
+				break;
+		  case 8:
+				break;
+    }
+  }
 }
