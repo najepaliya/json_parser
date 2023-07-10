@@ -8,10 +8,10 @@
 - no external dependencies
 - notable parsing and indexing runtime improvements compared to [nlohmann/json](https://github.com/nlohmann/json)
 
-## benchmarks
+<!-- ## benchmarks
 - a table of the 10-run average of the time it takes to parse relatively large JSON files compared to the de facto standard C++ JSON library
 
 | input (mb) | nlohmann/json (ms) | najepaliya/json_parser (ms) | runtime improvement |
 | :--------: | :----------------: | :-------------------------: | :-----------------: |
 | 10         |    395             | 222                         | 43.7%               |
-| 25         | 1667               | 1371                        |  17.8%              |
+| 25         | 1667               | 1371                        |  17.8%              | -->
