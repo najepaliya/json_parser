@@ -1,6 +1,14 @@
 #pragma once
 
+#include <iostream>
+#include <string>
+
 class json
 {
-    void parse (std::string& buffer);
+  public:
+  	void parse (std::string& buffer);
 };
+
+void json::parse (std::string& buffer)
+{
+}

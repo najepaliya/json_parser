@@ -3,8 +3,9 @@
 
 int main()
 {
-	json j;
 	std::ifstream file ("test.json");
-	std::string buffer ((std::istreambuf_iterator<char> (file)), std::istreambuf_iterator<char>());
+	std::string contents ((std::istreambuf_iterator<char> (file)), std::istreambuf_iterator<char>());
+	json j;
+	j.parse (contents);
   return 0;
 }
