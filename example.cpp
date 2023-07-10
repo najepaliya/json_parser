@@ -12,5 +12,5 @@ int main()
 	{
 		std::cout << root->children[i].string << "\n";
 	}
-  return 0;
+	return 0;
 }
