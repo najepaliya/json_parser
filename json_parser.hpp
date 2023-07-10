@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -48,6 +49,19 @@ void json::clear()
   root.children.clear();
 }
 
+enum symbols: uint_fast8_t
+{
+	// terminals
+	end,
+	// nonterminals
+	nt_end
+};
+
 void json::parse (std::string& buffer)
 {
+	// append null terminator
+	buffer.push_back ('\0');
+
+	// remove null terminator
+	buffer.pop_back();
 }
