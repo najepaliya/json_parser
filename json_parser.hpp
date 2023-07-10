@@ -24,9 +24,29 @@ token::token (std::string s): string (std::move (s))
 
 class json
 {
+  private:
+    token root;
+    void clear();
   public:
-  	void parse (std::string& buffer);
+    json();
+    void parse (std::string& buffer);
+    token* index();
 };
+
+json::json()
+{
+  root = token ("");
+}
+
+token* json::index()
+{
+  return &root;
+}
+
+void json::clear()
+{
+  root.children.clear();
+}
 
 void json::parse (std::string& buffer)
 {
