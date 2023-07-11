@@ -53,9 +53,9 @@ void json::clear()
 enum symbol: uint_fast8_t
 {
 	// terminals
-	end, whitespace, quote, space, character, backslash,
+	end, whitespace, quote, space, character, backslash, escape,
 	// nonterminals
-	nt_end, nt_primitive, nt_whitespace, nt_value, nt_string, nt_characters
+	nt_end, nt_primitive, nt_whitespace, nt_value, nt_string, nt_characters, nt_escape
 };
 
 void json::parse (std::string& buffer)
@@ -66,15 +66,16 @@ void json::parse (std::string& buffer)
 	// append null terminator
 	buffer.push_back ('\0');
 
-	uint_fast8_t rule_table [6][6] =
+	uint_fast8_t rule_table [7][7] =
 	{
-/*  $ ws  " sp ch  \  */
-		4, 0, 0, 0, 0, 0, // end  0
-		7, 7, 7, 7, 7, 7, // prim 1 FIX LATER
-		1, 3, 1, 3, 0, 0, // ws   2
-		0, 5, 5, 0, 0, 0, // val  3
-		0, 0, 6, 0, 0, 0, // str  4
-		0, 0, 2, 3, 3, 8, // chrs 5
+/*  $ ws  " sp ch  \ esc  */
+		4, 0, 0, 0, 0, 0,  0, // end  0
+		7, 7, 7, 7, 7, 7,  0, // prim 1 FIX LATER
+		1, 3, 1, 3, 0, 0,  0, // ws   2
+		0, 5, 5, 0, 0, 0,  0, // val  3
+		0, 0, 6, 0, 0, 0,  0, // str  4
+		0, 0, 2, 3, 3, 8,  3, // chrs 5
+		0, 0, 2, 0, 0, 2,  2, // esc  6
 	};
 	
 	// initialize symbol stack
@@ -112,17 +113,20 @@ void json::parse (std::string& buffer)
 			case '\\':
 				terminal = backslash;
 				break;
+			case '/': case 'b': case 'f': case 'n': case 'r': case 't':
+				terminal = escape;
+				break;
 		}
 
-		switch (rule_table[symbols.top() % 6][terminal % 6])
+		switch (rule_table[symbols.top() % 7][terminal % 7])
 		{
 			case 0: // error
-				std::cout << "ERROR: " << index << "->'" << buffer[index] << "'\n";
+				std::cout << "==ERROR: " << index << "->'" << buffer[index] << "'==\n";
 				clear();
 				buffer.pop_back();
 				return;
 			case 1: // null
-				std::cout << "NULL\n";
+				std::cout << "==NULL==\n";
 				symbols.pop();
 				index -= 1;
 				break;
@@ -130,7 +134,7 @@ void json::parse (std::string& buffer)
 				symbols.pop();
 				break;
 			case 4: // end
-				std::cout << "VALID\n";
+				std::cout << "==VALID==\n";
 				buffer.pop_back();
 				return;
 			case 5: // string value
@@ -151,6 +155,7 @@ void json::parse (std::string& buffer)
 				index -= 1;
 				break;
 			case 8:
+				symbols.push (nt_escape);
 				break;
 		}
 	}
