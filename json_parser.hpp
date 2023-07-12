@@ -53,9 +53,9 @@ void json::clear()
 enum symbol: uint_fast8_t
 {
 	// terminals
-	end, whitespace, n, u, l, f, a, s, e, t, r, // quote, space, character, backslash, escape, u, hex,
+	end, whitespace, n, u, l, f, a, s, e, t, r, digit, dot, E, sign, // quote, space, character, backslash, escape, u, hex,
 	// nonterminals
-	nt_end, nt_primitive, nt_whitespace, nt_value, nt_u, nt_l, nt_a, nt_s, nt_e, nt_r // nt_string, nt_characters, nt_escape, nt_hex
+	nt_end, nt_primitive, nt_whitespace, nt_value, nt_u, nt_l, nt_a, nt_s, nt_e, nt_r, nt_integer, nt_digit, nt_fraction, nt_sign, nt_exponent // nt_string, nt_characters, nt_escape, nt_hex
 };
 
 void json::parse (std::string& buffer)
@@ -66,19 +66,24 @@ void json::parse (std::string& buffer)
 	// append null terminator
 	buffer.push_back ('\0');
 
-	uint_fast8_t rule_table [10][11] =
+	uint_fast8_t rule_table [15][15] =
 	{
-/*  $ ws  n  u  l  f  a  s  e  t  r  */
-		4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // end  0
-		5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, // prim 1
-		1, 3, 1, 0, 0, 1, 0, 0, 0, 1, 0, // ws   2
-		0, 0, 6, 0, 0, 7, 0, 0, 0, 8, 0, // val  3
-		0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, // u    4
-		0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, // l    5
-		0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, // a    6
-		0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, // s    7
-		0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, // e    8
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, // r    9
+/*  $ ws  n  u  l  f  a  s   e  t  r  #   .   E +- */
+		4, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0,  0,  0, 0, // end   0
+		5, 5, 5, 5, 5, 5, 5, 5,  5, 5, 5, 5,  0,  0, 0, // prim  1
+		1, 3, 1, 0, 0, 1, 0, 0,  0, 1, 0, 1,  0,  0, 0, // ws    2
+		0, 0, 6, 0, 0, 7, 0, 0,  0, 8, 0, 9,  0,  0, 0, // val   3
+		0, 0, 0, 2, 0, 0, 0, 0,  0, 0, 0, 0,  0,  0, 0, // u     4
+		0, 0, 0, 0, 2, 0, 0, 0,  0, 0, 0, 0,  0,  0, 0, // l     5
+		0, 0, 0, 0, 0, 0, 2, 0,  0, 0, 0, 0,  0,  0, 0, // a     6
+		0, 0, 0, 0, 0, 0, 0, 2,  0, 0, 0, 0,  0,  0, 0, // s     7
+		0, 0, 0, 0, 0, 0, 0, 0,  2, 0, 0, 0,  0,  0, 0, // e     8
+		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 2, 0,  0,  0, 0, // r     9
+		1, 1, 0, 0, 0, 0, 0, 0, 11, 0, 0, 3, 10, 11, 0, // int  10
+		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 2,  0,  0, 0, // dig  11
+		1, 1, 0, 0, 0, 0, 0, 0, 11, 0, 0, 3,  0, 11, 0, // frac 12
+		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 1,  0,  0, 2, // sign 13
+		1, 1, 0, 0, 0, 0, 0, 0,  0, 0, 0, 3,  0,  0, 0, // exp  14
 	};
 	
 	// initialize symbol stack
@@ -134,6 +139,18 @@ void json::parse (std::string& buffer)
 			case 'r':
 				terminal = r;
 				break;
+			case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+				terminal = digit;
+				break;
+			case '.':
+				terminal = dot;
+				break;
+			case 'E':
+				terminal = E;
+				break;
+			case '+': case '-':
+				terminal = sign;
+				break;
 			// case '"':
 			// 	terminal = quote;
 			// 	break;
@@ -154,9 +171,10 @@ void json::parse (std::string& buffer)
 			// 	break;
 		}
 
-		switch (rule_table[symbols.top() % 11][terminal % 11])
+		switch (rule_table[symbols.top() % 15][terminal % 15])
 		{
 			case 0: // error
+				std::cout << buffer << "\n";
 				std::cout << "==ERROR: " << index << "->'" << buffer[index] << "'==\n";
 				clear();
 				buffer.pop_back();
@@ -181,14 +199,16 @@ void json::parse (std::string& buffer)
 				break;
 			case 6: // null value
 				symbols.pop();
-				// symbols.push (nt_primitive);
+				indexes.push (index);
+				symbols.push (nt_primitive);
 				symbols.push (nt_l);
 				symbols.push (nt_l);
 				symbols.push (nt_u);
 				break;
 			case 7: // null value
 				symbols.pop();
-				// symbols.push (nt_primitive);
+				indexes.push (index);
+				symbols.push (nt_primitive);
 				symbols.push (nt_e);
 				symbols.push (nt_s);
 				symbols.push (nt_l);
@@ -196,10 +216,29 @@ void json::parse (std::string& buffer)
 				break;
 			case 8: // null value
 				symbols.pop();
-				// symbols.push (nt_primitive);
+				indexes.push (index);
+				symbols.push (nt_primitive);
 				symbols.push (nt_e);
 				symbols.push (nt_u);
 				symbols.push (nt_r);
+				break;
+			case 9: // number value
+				symbols.pop();
+				indexes.push (index);
+				symbols.push (nt_primitive);
+				// symbols.push (nt_fraction);
+				symbols.push (nt_integer);
+				break;
+			case 10: // fractional number
+				symbols.pop();
+				symbols.push (nt_fraction);
+				symbols.push (nt_digit);
+				break;
+			case 11: // exponential value
+				symbols.pop();
+				symbols.push (nt_exponent);
+				symbols.push (nt_digit);
+				symbols.push (nt_sign);
 				break;
 			// case 5: // string value
 			// 	symbols.pop();
