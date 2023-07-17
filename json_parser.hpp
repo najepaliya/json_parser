@@ -13,7 +13,7 @@ class token
 		std::string string;
 		std::vector<token> children;
 		token();
-	token (std::string s);
+		token (std::string s);
 };
 
 token::token()
@@ -31,7 +31,7 @@ class json
 		void clear();
 	public:
 		json();
-		void parse (std::string& buffer);
+		void parse (std::string& buffer, bool members);
 		token* index();
 };
 
@@ -58,7 +58,7 @@ enum symbol: uint_fast8_t
 	nt_end, nt_whitespace, nt_value, nt_string, nt_characters, nt_escape, nt_hex, nt_primitive, nt_headmember, nt_colon, nt_container, nt_memberlist, nt_headelement, nt_elementlist, nt_minus, nt_integer, nt_digits, nt_fraction, nt_digit, nt_exponent, nt_sign, nt_u, nt_l, nt_a, nt_s, nt_e, nt_r
 };
 
-void json::parse (std::string& buffer)
+void json::parse (std::string& buffer, bool members)
 {
 	// erase index before parsing
 	clear();
@@ -210,22 +210,18 @@ void json::parse (std::string& buffer)
 		switch (rule_table[symbols.top() % nt_end][terminal % nt_end])
 		{
 			case 0: // error
-				// std::cout << index << " => ERROR\n" << buffer << "\n";
 				std::cout << "t: '" << buffer[index] << "' i: " << index << " r: " << symbols.top() % nt_end << "\n";
 				clear();
 				buffer.pop_back();
 				return;
 			case 1: // null
-				// std::cout << index << " => NULL\n";
 				symbols.pop();
 				index -= 1;
 				break;
 			case 2: // match
-				// std::cout << index << " => MATCH\n";
 				symbols.pop();
 				break;
 			case 4: // end
-				// std::cout << index << " => VALID\n";
 				buffer.pop_back();
 				return;
 			case 5: // string value
@@ -254,7 +250,6 @@ void json::parse (std::string& buffer)
 				symbols.pop();
 				indexes.pop();
 				index -= 1;
-				// std::cout << index << " => PRIM\n";
 				break;
 			case 10: // object value and container
 				symbols.pop();
@@ -266,18 +261,20 @@ void json::parse (std::string& buffer)
 			case 11: // load member and container
 				symbols.pop();
 				symbols.push (nt_memberlist);
-				symbols.push (nt_container);
+				if (members)
+				{
+					symbols.push (nt_container);
+					containers.top()->children.emplace_back ("");
+        	containers.push (&(containers.top()->children.back()));
+				}
 				symbols.push (nt_value);
 				symbols.push (nt_whitespace);
 				symbols.push (nt_colon);
 				symbols.push (nt_whitespace);
 				symbols.push (nt_string);
 				index -= 1;
-				containers.top()->children.emplace_back ("");
-        containers.push (&(containers.top()->children.back()));
 				break;
 			case 12: // unload container
-				// std::cout << index << " => CONT\n";
 				symbols.pop();
 				containers.pop();
 				index -= 1;
@@ -285,15 +282,18 @@ void json::parse (std::string& buffer)
 			case 13: // load additional member and container
 				symbols.pop();
 				symbols.push (nt_memberlist);
-				symbols.push (nt_container);
+				if (members)
+				{
+					symbols.push (nt_container);
+					containers.top()->children.emplace_back ("");
+        	containers.push (&(containers.top()->children.back()));
+				}
 				symbols.push (nt_value);
 				symbols.push (nt_whitespace);
 				symbols.push (nt_colon);
 				symbols.push (nt_whitespace);
 				symbols.push (nt_string);
 				symbols.push (nt_whitespace);
-				containers.top()->children.emplace_back ("");
-        containers.push (&(containers.top()->children.back()));
 				break;
 			case 14: // array value and container
 				symbols.pop();
