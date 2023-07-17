@@ -8,9 +8,6 @@ int main()
 	json j;
 	j.parse (contents);
 	token* root = j.index();
-	for (int i=0; i < root->children.size(); i += 1)
-	{
-		std::cout << root->children[i].string << "\n";
-	}
+	// std::cout << root->children[0].string << "\n";
 	return 0;
 }
