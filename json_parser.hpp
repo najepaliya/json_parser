@@ -85,10 +85,10 @@ void json::parse (std::string& buffer)
 		 0,  3,  0,  3,  0,  0,  0,  0,  0,  0,  0, 16,  0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // elml 13
 		 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // min  14
 		 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2, 18,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // int  15
-		 1,  1,  0,  1,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  3,  3,  1,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // digs 16
-		 1,  1,  0,  1,  0,  0,  0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  0, 19,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // frac 17
+		 1,  1,  0,  1,  0,  0,  0,  0,  0,  0,  1,  1,  0,  0,  0,  3,  3,  1,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // digs 16
+		 1,  1,  0,  1,  0,  0,  0,  0,  0,  0,  1,  1,  0,  1,  0,  0,  0, 19,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // frac 17
 		 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // dig  18
-		 1,  1,  0,  1,  0,  0,  0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  0,  0, 20, 20,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // exp  19
+		 1,  1,  0,  1,  0,  0,  0,  0,  0,  0,  1,  1,  0,  1,  0,  0,  0,  0, 20, 20,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // exp  19
 		 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  1,  1,  0,  0,  0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0, // sig  20
 		 0,  0,  0,  0,  0,  0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // u    21
 		 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  0,  0,  0,  0,  0,  0,  0, // l    22
@@ -210,22 +210,22 @@ void json::parse (std::string& buffer)
 		switch (rule_table[symbols.top() % nt_end][terminal % nt_end])
 		{
 			case 0: // error
-				std::cout << index << " => ERROR\n" << buffer << "\n";
+				// std::cout << index << " => ERROR\n" << buffer << "\n";
 				std::cout << "t: '" << buffer[index] << "' i: " << index << " r: " << symbols.top() % nt_end << "\n";
 				clear();
 				buffer.pop_back();
 				return;
 			case 1: // null
-				std::cout << index << " => NULL\n";
+				// std::cout << index << " => NULL\n";
 				symbols.pop();
 				index -= 1;
 				break;
 			case 2: // match
-				std::cout << index << " => MATCH\n";
+				// std::cout << index << " => MATCH\n";
 				symbols.pop();
 				break;
 			case 4: // end
-				std::cout << index << " => VALID\n";
+				// std::cout << index << " => VALID\n";
 				buffer.pop_back();
 				return;
 			case 5: // string value
@@ -254,7 +254,7 @@ void json::parse (std::string& buffer)
 				symbols.pop();
 				indexes.pop();
 				index -= 1;
-				std::cout << index << " => PRIM\n";
+				// std::cout << index << " => PRIM\n";
 				break;
 			case 10: // object value and container
 				symbols.pop();
@@ -277,7 +277,7 @@ void json::parse (std::string& buffer)
         containers.push (&(containers.top()->children.back()));
 				break;
 			case 12: // unload container
-				std::cout << index << " => CONT\n";
+				// std::cout << index << " => CONT\n";
 				symbols.pop();
 				containers.pop();
 				index -= 1;
