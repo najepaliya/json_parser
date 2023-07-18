@@ -9,7 +9,6 @@
 class token
 {
 	public:
-		int8_t type;
 		std::string string;
 		std::vector<token> children;
 		token();
