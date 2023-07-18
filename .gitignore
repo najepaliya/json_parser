@@ -1,6 +1,6 @@
 *
 !.gitignore
-!example.cpp
+!benchmark.cpp
 !json_parser.hpp
 !readme.md
 !test.json
